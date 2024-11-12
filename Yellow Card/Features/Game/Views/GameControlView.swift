@@ -74,31 +74,31 @@ struct GameControlView: View {
                 .offset(y: isAnimating ? 0 : 30)
                 .opacity(isAnimating ? 1 : 0)
 
-                // Extra time control panel
+                // Stoppage time control panel
                 ControlPanel {
                     VStack {
-                        Text("EXTRA TIME")
+                        Text("STOPPAGE TIME")
                             .font(.system(size: 14, weight: .medium))
                             .foregroundColor(.white.opacity(0.7))
 
                         HStack(spacing: 24) {
-                            // Decrease extra time button
+                            // Decrease stoppage time button
                             ControlButton(
                                 label: "-",
                                 size: .large,
-                                action: { gameState.subtractExtraTime() }
+                                action: { gameState.subtractStoppageTime() }
                             )
 
-                            // Extra time display
-                            //Text("+\(gameState.currentHalfState.extraTime)")
+                            // Stoppage time display
+                            //Text("+\(gameState.currentHalfState.stoppageTime)")
                             //    .font(.system(size: 24, weight: .bold, design: .rounded))
                             //    .foregroundColor(.white)
 
-                            // Increase extra time button
+                            // Increase stoppage time button
                             ControlButton(
                                 label: "+",
                                 size: .large,
-                                action: { gameState.addExtraTime() }
+                                action: { gameState.addStoppageTime() }
                             )
                         }
                     }

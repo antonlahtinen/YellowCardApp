@@ -174,13 +174,13 @@ struct TimelineView: View {
                     TimelineHalf(
                         half: "1st Half",
                         time: formatTime(gameState.halves[0].time),
-                        extraTime: gameState.halves[0].extraTime
+                        stoppageTime: gameState.halves[0].stoppageTime
                     )
                     
                     TimelineHalf(
                         half: "2nd Half",
                         time: formatTime(gameState.halves[1].time),
-                        extraTime: gameState.halves[1].extraTime
+                        stoppageTime: gameState.halves[1].stoppageTime
                     )
                 }
             }
@@ -300,7 +300,7 @@ struct StatBox: View {
 struct TimelineHalf: View {
     let half: String
     let time: String
-    let extraTime: Int
+    let stoppageTime: Int
     
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -320,7 +320,7 @@ struct TimelineHalf: View {
                 HStack {
                     Image(systemName: "plus.circle")
                         .foregroundColor(.white.opacity(0.6))
-                    Text("+\(extraTime) min")
+                    Text("+\(stoppageTime) min")
                         .foregroundColor(.white)
                 }
             }

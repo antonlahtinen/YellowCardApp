@@ -93,8 +93,8 @@ struct ScoreButtonStyle: ButtonStyle {
     }
 }
 
-/// A custom button style for extra time controls
-struct ExtraTimeButtonStyle: ButtonStyle {
+/// A custom button style for stoppage time controls
+struct StoppageTimeButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .font(.system(size: 20, weight: .bold))

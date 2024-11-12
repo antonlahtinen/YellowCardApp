@@ -64,14 +64,14 @@ struct ScoreboardView: View {
                     TimeIndicator(label: "TIME", value: formattedTime)
                         .frame(maxWidth: .infinity)
 
-                    if gameState.currentHalfState.extraTime > 0 {
+                    if gameState.currentHalfState.stoppageTime > 0 {
                         Divider()
                             .frame(height: 20)
                             .background(Color.white.opacity(0.3))
 
                         TimeIndicator(
-                            label: "EXTRA",
-                            value: "+\(gameState.currentHalfState.extraTime)'",
+                            label: "STOPPAGE",
+                            value: "+\(gameState.currentHalfState.stoppageTime)'",
                             valueColor: .yellow
                         )
                         .frame(maxWidth: .infinity)

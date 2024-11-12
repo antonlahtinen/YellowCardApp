@@ -3,7 +3,7 @@ import Combine
 
 // MARK: - HalfState Class
 
-/// Represents the state of a single half in a game, managing time, extra time, and timer controls.
+/// Represents the state of a single half in a game, managing time, stoppage time, and timer controls.
 /// Conforms to `ObservableObject` for state management, `Codable` for encoding and decoding half data,
 /// and `Hashable` for use in hashed collections.
 class HalfState: ObservableObject, Codable, Hashable {
@@ -14,7 +14,7 @@ class HalfState: ObservableObject, Codable, Hashable {
     @Published var time: Int = 0
     
     /// The additional time added to the half, typically for stoppage or injury time.
-    @Published var extraTime: Int = 0
+    @Published var stoppageTime: Int = 0
     
     /// Indicates whether the timer is currently running.
     @Published var isRunning: Bool = false
@@ -31,7 +31,7 @@ class HalfState: ObservableObject, Codable, Hashable {
     
     /// Defines the keys used for encoding and decoding the `HalfState`.
     enum CodingKeys: CodingKey {
-        case time, extraTime, isRunning, halfDuration
+        case time, stoppageTime, isRunning, halfDuration
     }
     
     // MARK: - Initializers
@@ -50,7 +50,7 @@ class HalfState: ObservableObject, Codable, Hashable {
     required init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         time = try container.decode(Int.self, forKey: .time)
-        extraTime = try container.decode(Int.self, forKey: .extraTime)
+        stoppageTime = try container.decode(Int.self, forKey: .stoppageTime)
         isRunning = try container.decode(Bool.self, forKey: .isRunning)
         halfDuration = try container.decode(Int.self, forKey: .halfDuration)
     }
@@ -64,7 +64,7 @@ class HalfState: ObservableObject, Codable, Hashable {
     func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(time, forKey: .time)
-        try container.encode(extraTime, forKey: .extraTime)
+        try container.encode(stoppageTime, forKey: .stoppageTime)
         try container.encode(isRunning, forKey: .isRunning)
         try container.encode(halfDuration, forKey: .halfDuration)
     }
@@ -105,24 +105,24 @@ class HalfState: ObservableObject, Codable, Hashable {
     /// Resets the timer and related properties to their initial states.
     ///
     /// - Stops the timer.
-    /// - Resets `time` and `extraTime` to zero.
+    /// - Resets `time` and `stoppageTime` to zero.
     /// - Sets `isRunning` to `false`.
     func resetTimer() {
         timer?.invalidate()
         time = 0
-        extraTime = 0
+        stoppageTime = 0
         isRunning = false
     }
     
-    /// Adds one second to the extra time.
-    func addExtraTime() {
-        extraTime += 1
+    /// Adds one second to the stoppage time.
+    func addStoppageTime() {
+        stoppageTime += 1
     }
     
-    /// Subtracts one second from the extra time, ensuring it doesn't go below zero.
-    func subtractExtraTime() {
-        if extraTime > 0 {
-            extraTime -= 1
+    /// Subtracts one second from the stoppage time, ensuring it doesn't go below zero.
+    func subtractStoppageTime() {
+        if stoppageTime > 0 {
+            stoppageTime -= 1
         }
     }
     
@@ -154,7 +154,7 @@ class HalfState: ObservableObject, Codable, Hashable {
     /// - Returns: `true` if all properties are equal, otherwise `false`.
     static func == (lhs: HalfState, rhs: HalfState) -> Bool {
         return lhs.time == rhs.time &&
-               lhs.extraTime == rhs.extraTime &&
+               lhs.stoppageTime == rhs.stoppageTime &&
                lhs.isRunning == rhs.isRunning &&
                lhs.halfDuration == rhs.halfDuration
     }
@@ -164,7 +164,7 @@ class HalfState: ObservableObject, Codable, Hashable {
     /// - Parameter hasher: The hasher to use when combining the components.
     func hash(into hasher: inout Hasher) {
         hasher.combine(time)
-        hasher.combine(extraTime)
+        hasher.combine(stoppageTime)
         hasher.combine(isRunning)
         hasher.combine(halfDuration)
     }

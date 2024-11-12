@@ -155,14 +155,14 @@ class GameState: ObservableObject, Identifiable, Codable {
             }
         }
     
-    /// Adds extra time to the current half.
-    func addExtraTime() {
-        currentHalfState.addExtraTime()
+    /// Adds stoppage time to the current half.
+    func addStoppageTime() {
+        currentHalfState.addStoppageTime()
     }
     
-    /// Subtracts extra time from the current half.
-    func subtractExtraTime() {
-        currentHalfState.subtractExtraTime()
+    /// Subtracts stoppage time from the current half.
+    func subtractStoppageTime() {
+        currentHalfState.subtractStoppageTime()
     }
     
     /// Stops all timers for both halves.
