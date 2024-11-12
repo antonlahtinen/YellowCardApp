@@ -13,28 +13,48 @@ class GameState: ObservableObject, Identifiable, Codable {
     @Published var homeTeam: String
     @Published var awayTeam: String
     @Published var halves: [HalfState]
+    
     @Published var cardEvents: [CardEvent] = []
     @Published var substitutions: [SubstitutionEvent] = []
     @Published var goals: [GoalEvent] = []
     
-    // MARK: - Private Properties
+    @Published var penalties: [PenaltyEvent] = []
+    @Published var penaltyShootoutHomeScore: Int = 0
+    @Published var penaltyShootoutAwayScore: Int = 0
     
+    func addPenalty(_ penalty: PenaltyEvent) {
+        penalties.append(penalty)
+        if penalty.scored {
+            if penalty.team == .home {
+                penaltyShootoutHomeScore += 1
+            } else {
+                penaltyShootoutAwayScore += 1
+            }
+        }
+    }
+    
+    // MARK: - Private Properties
     /// A set to hold Combine cancellables for managing subscriptions.
     private var cancellables = Set<AnyCancellable>()
+    
+    
     
     // MARK: - Identifiable Properties
     
     /// A unique identifier for the game state.
     let id: UUID
-    
     /// The date and time when the game state was created.
     let date: Date
+    
+    
     
     // MARK: - Coding Keys
     
     /// Defines the keys used for encoding and decoding the `GameState`.
     enum CodingKeys: CodingKey {
-        case id, date, half, homeScore, awayScore, homeTeam, awayTeam, halves, cardEvents, substitutions, goals
+        case id, date, half, homeScore, awayScore, homeTeam, awayTeam, halves,
+             cardEvents, substitutions, goals, penalties,
+             penaltyShootoutHomeScore, penaltyShootoutAwayScore
     }
     
     // MARK: - Computed Properties
@@ -56,6 +76,7 @@ class GameState: ObservableObject, Identifiable, Codable {
         self.homeTeam = homeTeam
         self.awayTeam = awayTeam
         _halves = Published(initialValue: [
+            HalfState(halfDuration: halfDuration),
             HalfState(halfDuration: halfDuration),
             HalfState(halfDuration: halfDuration),
             HalfState(halfDuration: halfDuration),
@@ -82,6 +103,9 @@ class GameState: ObservableObject, Identifiable, Codable {
         cardEvents = try container.decode([CardEvent].self, forKey: .cardEvents)
         substitutions = try container.decode([SubstitutionEvent].self, forKey: .substitutions)
         goals = try container.decode([GoalEvent].self, forKey: .goals)
+        penalties = try container.decode([PenaltyEvent].self, forKey: .penalties)
+        penaltyShootoutHomeScore = try container.decode(Int.self, forKey: .penaltyShootoutHomeScore)
+        penaltyShootoutAwayScore = try container.decode(Int.self, forKey: .penaltyShootoutAwayScore)
         
         setupCurrentHalfBinding()
     }
@@ -112,6 +136,9 @@ class GameState: ObservableObject, Identifiable, Codable {
         try container.encode(cardEvents, forKey: .cardEvents)
         try container.encode(substitutions, forKey: .substitutions)
         try container.encode(goals, forKey: .goals)
+        try container.encode(penalties, forKey: .penalties)
+        try container.encode(penaltyShootoutHomeScore, forKey: .penaltyShootoutHomeScore)
+        try container.encode(penaltyShootoutAwayScore, forKey: .penaltyShootoutAwayScore)
     }
     
     // MARK: - Private Methods
@@ -143,18 +170,11 @@ class GameState: ObservableObject, Identifiable, Codable {
     }
     
     
-    var periodName: String {
-            switch half {
-                case 1: return "1st Half"
-                case 2: return "2nd Half"
-                case 3: return "ET1"
-                case 4: return "ET2"
-                default: return ""
-            }
-        }
+    
+    
     /// Switches the current half (e.g., from first to second half).
     func switchHalf() {
-        if half < 4 {
+        if half < 5 {
             half += 1
             cancellables.removeAll()
             setupCurrentHalfBinding()
@@ -167,6 +187,7 @@ class GameState: ObservableObject, Identifiable, Codable {
             case 2: return "2nd"
             case 3: return "ET 1"
             case 4: return "ET 2"
+            case 5: return "Penalties"
             default: return "\(half)"
         }
     }

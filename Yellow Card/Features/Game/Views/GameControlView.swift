@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// A view that contains all the game controls including score, timer, cards and substitutions
+/// A view that contains all the game controls including score, timer, cards, and substitutions
 struct GameControlView: View {
     // MARK: - Properties
 
@@ -15,104 +15,99 @@ struct GameControlView: View {
     /// State variable to control reset alert visibility
     @State private var showingResetAlert = false
     /// State variable to control switch half alert visibility
-    @State private var showingSwitchHalfAlert = false
-    
     @State private var showingHalfPicker = false
-    @State private var selectedHalf = 1
+    /// State variable to control penalty sheet visibility
+    @State private var showingPenaltySheet = false
 
     // MARK: - Body
 
     var body: some View {
         VStack(spacing: 32) {
-            // Score controls for both teams
-            HStack(spacing: 20) {
-                // Home team score control
-                TeamScoreControl(
-                    score: $gameState.homeScore,
-                    teamName: $gameState.homeTeam,
-                    gameState: gameState,
-                    team: .home,
-                    icon: "house.fill"
-                )
+            // Only show these controls if not in Penalties
+            if gameState.half != 5 {
+                // Score controls for both teams
+                HStack(spacing: 20) {
+                    // Home team score control
+                    TeamScoreControl(
+                        score: $gameState.homeScore,
+                        teamName: $gameState.homeTeam,
+                        gameState: gameState,
+                        team: .home,
+                        icon: "house.fill"
+                    )
 
-                // Away team score control
-                TeamScoreControl(
-                    score: $gameState.awayScore,
-                    teamName: $gameState.awayTeam,
-                    gameState: gameState,
-                    team: .away,
-                    icon: "airplane"
-                )
-            }
-            .offset(y: isAnimating ? 0 : 30)
-            .opacity(isAnimating ? 1 : 0)
-            .frame(maxWidth: UIScreen.main.bounds.width * 0.9) // Adjusted to use maxWidth
-
-            HStack(spacing: 20) {
-                // Timer control panel
-                ControlPanel {
-                    VStack {
-                        Text("TIMER")
-                            .font(.system(size: 14, weight: .medium))
-                            .foregroundColor(.white.opacity(0.7))
-
-                        HStack(spacing: 24) {
-                            // Play/Pause button
-                            ControlButton(
-                                icon: gameState.currentHalfState.isRunning ? "pause.circle.fill" : "play.circle.fill",
-                                size: .large,
-                                action: { gameState.startStopTimer() }
-                            )
-
-                            // Reset button
-                            ControlButton(
-                                icon: "stop.circle.fill",
-                                size: .large,
-                                action: { showingResetAlert = true }
-                            )
-                        }
-                    }
+                    // Away team score control
+                    TeamScoreControl(
+                        score: $gameState.awayScore,
+                        teamName: $gameState.awayTeam,
+                        gameState: gameState,
+                        team: .away,
+                        icon: "airplane"
+                    )
                 }
-
                 .offset(y: isAnimating ? 0 : 30)
                 .opacity(isAnimating ? 1 : 0)
+                .frame(maxWidth: UIScreen.main.bounds.width * 0.9) // Adjusted to use maxWidth
 
-                // Stoppage time control panel
-                ControlPanel {
-                    VStack {
-                        Text("STOPPAGE TIME")
-                            .font(.system(size: 14, weight: .medium))
-                            .foregroundColor(.white.opacity(0.7))
+                HStack(spacing: 20) {
+                    // Timer control panel
+                    ControlPanel {
+                        VStack {
+                            Text("TIMER")
+                                .font(.system(size: 14, weight: .medium))
+                                .foregroundColor(.white.opacity(0.7))
 
-                        HStack(spacing: 24) {
-                            // Decrease stoppage time button
-                            ControlButton(
-                                label: "-",
-                                size: .large,
-                                action: { gameState.subtractStoppageTime() }
-                            )
+                            HStack(spacing: 24) {
+                                // Play/Pause button
+                                ControlButton(
+                                    icon: gameState.currentHalfState.isRunning ? "pause.circle.fill" : "play.circle.fill",
+                                    size: .large,
+                                    action: { gameState.startStopTimer() }
+                                )
 
-                            // Stoppage time display
-                            //Text("+\(gameState.currentHalfState.stoppageTime)")
-                            //    .font(.system(size: 24, weight: .bold, design: .rounded))
-                            //    .foregroundColor(.white)
-
-                            // Increase stoppage time button
-                            ControlButton(
-                                label: "+",
-                                size: .large,
-                                action: { gameState.addStoppageTime() }
-                            )
+                                // Reset button
+                                ControlButton(
+                                    icon: "stop.circle.fill",
+                                    size: .large,
+                                    action: { showingResetAlert = true }
+                                )
+                            }
                         }
                     }
+                    .offset(y: isAnimating ? 0 : 30)
+                    .opacity(isAnimating ? 1 : 0)
+
+                    // Stoppage time control panel
+                    ControlPanel {
+                        VStack {
+                            Text("STOPPAGE TIME")
+                                .font(.system(size: 14, weight: .medium))
+                                .foregroundColor(.white.opacity(0.7))
+
+                            HStack(spacing: 24) {
+                                // Decrease stoppage time button
+                                ControlButton(
+                                    label: "-",
+                                    size: .large,
+                                    action: { gameState.subtractStoppageTime() }
+                                )
+
+                                // Increase stoppage time button
+                                ControlButton(
+                                    label: "+",
+                                    size: .large,
+                                    action: { gameState.addStoppageTime() }
+                                )
+                            }
+                        }
+                    }
+                    .offset(y: isAnimating ? 0 : 30)
+                    .opacity(isAnimating ? 1 : 0)
                 }
-
-                .offset(y: isAnimating ? 0 : 30)
-                .opacity(isAnimating ? 1 : 0)
+                .frame(maxWidth: UIScreen.main.bounds.width * 0.9) // Ensure the HStack respects the overall width
             }
-            .frame(maxWidth: UIScreen.main.bounds.width * 0.9) // Ensure the HStack respects the overall width
 
-            // Half switch control
+            // Half switch control (always visible)
             ControlButton(
                 label: "Switch Half",
                 size: .medium,
@@ -123,7 +118,7 @@ struct GameControlView: View {
             .opacity(isAnimating ? 1 : 0)
             .alert("Switch Half", isPresented: $showingHalfPicker) {
                 Button("Cancel", role: .cancel) {}
-                
+
                 Button("1st Half") {
                     if gameState.currentHalfState.isRunning {
                         gameState.stopTimer()
@@ -131,7 +126,7 @@ struct GameControlView: View {
                     gameState.half = 1
                     gameState.setupCurrentHalfBinding()
                 }
-                
+
                 Button("2nd Half") {
                     if gameState.currentHalfState.isRunning {
                         gameState.stopTimer()
@@ -139,7 +134,7 @@ struct GameControlView: View {
                     gameState.half = 2
                     gameState.setupCurrentHalfBinding()
                 }
-                
+
                 Button("ET 1") {
                     if gameState.currentHalfState.isRunning {
                         gameState.stopTimer()
@@ -147,7 +142,7 @@ struct GameControlView: View {
                     gameState.half = 3
                     gameState.setupCurrentHalfBinding()
                 }
-                
+
                 Button("ET 2") {
                     if gameState.currentHalfState.isRunning {
                         gameState.stopTimer()
@@ -155,47 +150,76 @@ struct GameControlView: View {
                     gameState.half = 4
                     gameState.setupCurrentHalfBinding()
                 }
+
+                Button("Penalties") {
+                    if gameState.currentHalfState.isRunning {
+                        gameState.stopTimer()
+                    }
+                    gameState.half = 5
+                    gameState.setupCurrentHalfBinding()
+                }
             } message: {
                 Text("Select which half you want to switch to. The timer for the current half will be stopped.")
             }
 
-            // Card events section
-            VStack(spacing: 16) {
-                // Add card button
+            // Only show Add Penalty button during Penalties half
+            if gameState.half == 5 {
                 ControlButton(
-                    label: "Add Card Event",
-                    icon: "rectangle.stack.badge.plus",
+                    label: "Add Penalty",
+                    icon: "soccerball",
                     size: .medium,
                     width: 250,
-                    action: { showingCardSheet = true }
+                    action: { showingPenaltySheet = true }
                 )
-
-                // Display card events if any exist
-                if !gameState.cardEvents.isEmpty {
-                    CardEventsPanel(events: gameState.cardEvents, gameState: gameState)
-                }
+                .offset(y: isAnimating ? 0 : 30)
+                .opacity(isAnimating ? 1 : 0)
             }
-            .offset(y: isAnimating ? 0 : 30)
-            .opacity(isAnimating ? 1 : 0)
 
-            // Substitution events section
-            VStack(spacing: 16) {
-                // Add substitution button
-                ControlButton(
-                    label: "Add Substitution",
-                    icon: "arrow.left.arrow.right.circle.fill",
-                    size: .medium,
-                    width: 250,
-                    action: { showingSubstitutionSheet = true }
-                )
-
-                // Display substitutions if any exist
-                if !gameState.substitutions.isEmpty {
-                    SubstitutionsPanel(substitutions: gameState.substitutions, gameState: gameState)
-                }
+            // Show Penalty Panel if there are penalties
+            if gameState.half == 5 && !gameState.penalties.isEmpty {
+                PenaltyPanel(penalties: gameState.penalties, gameState: gameState)
             }
-            .offset(y: isAnimating ? 0 : 30)
-            .opacity(isAnimating ? 1 : 0)
+
+            // Only show these sections if not in Penalties
+            if gameState.half != 5 {
+                // Card events section
+                VStack(spacing: 16) {
+                    // Add card button
+                    ControlButton(
+                        label: "Add Card Event",
+                        icon: "rectangle.stack.badge.plus",
+                        size: .medium,
+                        width: 250,
+                        action: { showingCardSheet = true }
+                    )
+
+                    // Display card events if any exist
+                    if !gameState.cardEvents.isEmpty {
+                        CardEventsPanel(events: gameState.cardEvents, gameState: gameState)
+                    }
+                }
+                .offset(y: isAnimating ? 0 : 30)
+                .opacity(isAnimating ? 1 : 0)
+
+                // Substitution events section
+                VStack(spacing: 16) {
+                    // Add substitution button
+                    ControlButton(
+                        label: "Add Substitution",
+                        icon: "arrow.left.arrow.right.circle.fill",
+                        size: .medium,
+                        width: 250,
+                        action: { showingSubstitutionSheet = true }
+                    )
+
+                    // Display substitutions if any exist
+                    if !gameState.substitutions.isEmpty {
+                        SubstitutionsPanel(substitutions: gameState.substitutions, gameState: gameState)
+                    }
+                }
+                .offset(y: isAnimating ? 0 : 30)
+                .opacity(isAnimating ? 1 : 0)
+            }
 
             Spacer()
         }
@@ -223,8 +247,13 @@ struct GameControlView: View {
         .sheet(isPresented: $showingSubstitutionSheet) {
             AddSubstitutionView(gameState: gameState)
         }
+        // Sheet for adding penalties
+        .sheet(isPresented: $showingPenaltySheet) {
+            AddPenaltyView(gameState: gameState)
+        }
     }
 }
+
 
 /// A view that displays and controls a team's score and goals
 struct TeamScoreControl: View {
@@ -262,7 +291,6 @@ struct TeamScoreControl: View {
                     text: $teamName
                 )
 
-
                 // Add goal button
                 Button(action: { showingAddGoal = true }) {
                     Label("Add Goal", systemImage: "soccerball")
@@ -273,7 +301,6 @@ struct TeamScoreControl: View {
                         .background(Color.green.opacity(0.3))
                         .cornerRadius(10)
                 }
-
 
                 // Goals list
                 if !teamGoals.isEmpty {
@@ -342,14 +369,18 @@ struct CardEventsPanel: View {
                                 .foregroundColor(.white.opacity(0.7))
                                 .lineLimit(1)
                                 .truncationMode(.tail)
-                            
+
                             HStack {
                                 // Time of card
                                 Text("\(event.time / 60)'")
                                     .font(.system(size: 12))
                                     .foregroundColor(.yellow)
-                                
-                                Text(event.half == 1 ? "- 1st Half" : event.half == 2 ? "- 2nd Half" : event.half == 3 ? "- ET1" : "- ET2")
+
+                                Text(event.half == 1 ? "- 1st Half" :
+                                     event.half == 2 ? "- 2nd Half" :
+                                     event.half == 3 ? "- ET1" :
+                                     event.half == 4 ? "- ET2" :
+                                     event.half == 5 ? "- Penalties" : "")
                                     .font(.system(size: 12))
                                     .foregroundColor(.white.opacity(0.7))
                             }
@@ -372,7 +403,6 @@ struct CardEventsPanel: View {
         }
     }
 }
-
 
 /// A view that displays a scrollable list of substitution events
 struct SubstitutionsPanel: View {
@@ -407,25 +437,26 @@ struct SubstitutionsPanel: View {
                             Text(sub.team == .home ? gameState.homeTeam : gameState.awayTeam)
                                 .font(.system(size: 10))
                                 .foregroundColor(.white.opacity(0.7))
-                            
+
                             HStack {
                                 // Time of substitution
                                 Text("\(sub.time / 60)'")
                                     .font(.system(size: 12))
                                     .foregroundColor(.yellow)
-                                
-                                Text(sub.half == 1 ? "- 1st Half" : sub.half == 2 ? "- 2nd Half" : sub.half == 3 ? "- ET1" : "- ET2")
+
+                                Text(sub.half == 1 ? "- 1st Half" :
+                                     sub.half == 2 ? "- 2nd Half" :
+                                     sub.half == 3 ? "- ET1" :
+                                     sub.half == 4 ? "- ET2" :
+                                     sub.half == 5 ? "- Penalties" : "")
                                     .font(.system(size: 12))
                                     .foregroundColor(.white.opacity(0.7))
                             }
-                            
+
                             // Player numbers
                             Text("\(sub.playerOut) → \(sub.playerIn)")
                                 .font(.system(size: 12))
                                 .foregroundColor(.white)
-
-                            
-
                         }
                         .padding(.vertical, 8)
                     }
@@ -435,6 +466,42 @@ struct SubstitutionsPanel: View {
         }
         .sheet(item: $selectedSubstitution) { sub in
             EditSubstitutionView(gameState: gameState, substitution: sub)
+        }
+    }
+}
+
+struct PenaltyPanel: View {
+    // MARK: - Properties
+
+    /// Array of penalty events to display
+    let penalties: [PenaltyEvent]
+    /// The game state object
+    @ObservedObject var gameState: GameState
+    /// Currently selected penalty for editing
+    @State private var selectedPenalty: PenaltyEvent?
+
+    // MARK: - Body
+
+    var body: some View {
+        ControlPanel {
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 16) {
+                    ForEach(penalties) { penalty in
+                        PenaltyView(
+                            playerNumber: penalty.playerNumber,
+                            teamName: penalty.team == .home ? gameState.homeTeam : gameState.awayTeam,
+                            scored: penalty.scored,
+                            onTap: {
+                                selectedPenalty = penalty
+                            }
+                        )
+                    }
+                }
+                .padding(.horizontal)
+            }
+        }
+        .sheet(item: $selectedPenalty) { penalty in
+            EditPenaltyView(gameState: gameState, penalty: penalty)
         }
     }
 }

@@ -27,6 +27,7 @@ struct GameView: View {
             ScrollView {
                 VStack {
                     // Main game components
+                    
                     ScoreboardView(gameState: gameState)
                     GameControlView(gameState: gameState)
                 }

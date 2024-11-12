@@ -12,9 +12,9 @@ struct SavedGameDetailView: View {
             ZStack {
                 // Dynamic background gradient
                 LinearGradient(gradient: Gradient(colors: [gradientStart, gradientEnd]),
-                             startPoint: .topLeading,
-                             endPoint: .bottomTrailing)
-                    .ignoresSafeArea()
+                               startPoint: .topLeading,
+                               endPoint: .bottomTrailing)
+                .ignoresSafeArea()
                 
                 // Animated background circles
                 BackgroundCirclesView()
@@ -25,18 +25,23 @@ struct SavedGameDetailView: View {
                         ScoreCardView(gameState: gameState)
                         TimelineView(gameState: gameState)
                         
-                        GoalsSection(
-                                    goals: gameState.goals,
-                                    gameState: gameState
-                                )
+                        if !gameState.penalties.isEmpty {
+                            PenaltiesSection(
+                                penalties: gameState.penalties,
+                                gameState: gameState
+                            )
+                        }
                         
-                        // Cards Section
+                        GoalsSection(
+                            goals: gameState.goals,
+                            gameState: gameState
+                        )
+                        
                         CardsSection(
                             cardEvents: gameState.cardEvents,
                             gameState: gameState
                         )
                         
-                        // Substitutions Section
                         SubstitutionsSection(
                             substitutions: gameState.substitutions,
                             gameState: gameState
@@ -135,6 +140,7 @@ struct ScoreCardView: View {
     var body: some View {
         GlassMorphicCard {
             VStack(spacing: 16) {
+                // Regular match score
                 HStack {
                     TeamScore(team: gameState.homeTeam, score: gameState.homeScore, alignment: .leading)
                     Spacer()
@@ -146,6 +152,35 @@ struct ScoreCardView: View {
                     TeamScore(team: gameState.awayTeam, score: gameState.awayScore, alignment: .trailing)
                 }
                 
+                // Show penalty shootout score if penalties exist
+                if !gameState.penalties.isEmpty {
+                    Divider()
+                        .background(Color.white.opacity(0.3))
+                    
+                    Text("Penalty Shootout")
+                        .font(.headline)
+                        .foregroundColor(.white.opacity(0.8))
+                    
+                    HStack {
+                        TeamScore(
+                            team: gameState.homeTeam,
+                            score: gameState.penaltyShootoutHomeScore,
+                            alignment: .leading
+                        )
+                        Spacer()
+                        Text("PENS")
+                            .font(.title2)
+                            .fontWeight(.bold)
+                            .foregroundColor(.white.opacity(0.8))
+                        Spacer()
+                        TeamScore(
+                            team: gameState.awayTeam,
+                            score: gameState.penaltyShootoutAwayScore,
+                            alignment: .trailing
+                        )
+                    }
+                }
+                
                 Divider()
                     .background(Color.white.opacity(0.3))
                 
@@ -153,6 +188,9 @@ struct ScoreCardView: View {
                     StatBox(title: "Goals", value: "\(gameState.goals.count)")
                     StatBox(title: "Cards", value: "\(gameState.cardEvents.count)")
                     StatBox(title: "Subs", value: "\(gameState.substitutions.count)")
+                    if !gameState.penalties.isEmpty {
+                        StatBox(title: "Penalties", value: "\(gameState.penalties.count)")
+                    }
                 }
             }
             .padding()
@@ -160,9 +198,70 @@ struct ScoreCardView: View {
     }
 }
 
+struct PenaltiesSection: View {
+    let penalties: [PenaltyEvent]
+    let gameState: GameState
+    
+    var body: some View {
+        GlassMorphicCard {
+            VStack(alignment: .leading, spacing: 16) {
+                Text("Penalty Shootout")
+                    .font(.title3)
+                    .fontWeight(.bold)
+                    .foregroundColor(.white)
+                
+                if penalties.isEmpty {
+                    EmptyStateView(
+                        icon: "soccerball",
+                        message: "No penalties taken"
+                    )
+                } else {
+                    ForEach(penalties) { penalty in
+                        PenaltyRow(penalty: penalty, gameState: gameState)
+                        if penalty.id != penalties.last?.id {
+                            Divider()
+                                .background(Color.white.opacity(0.3))
+                        }
+                    }
+                }
+            }
+            .padding()
+        }
+    }
+}
+
+struct PenaltyRow: View {
+    let penalty: PenaltyEvent
+    let gameState: GameState
+    
+    var body: some View {
+        HStack {
+            Image(systemName: penalty.scored ? "soccerball" : "xmark.circle.fill")
+                .font(.system(size: 24))
+                .foregroundColor(penalty.scored ? .green : .red)
+            
+            VStack(alignment: .leading, spacing: 4) {
+                Text(penalty.team == .home ? gameState.homeTeam : gameState.awayTeam)
+                    .font(.subheadline)
+                    .foregroundColor(.white.opacity(0.7))
+                
+                Text("Player #\(penalty.playerNumber)")
+                    .font(.subheadline)
+                    .foregroundColor(.white)
+                
+                Text(penalty.scored ? "Scored" : "Missed")
+                    .font(.caption)
+                    .foregroundColor(penalty.scored ? .green : .red)
+            }
+            
+            Spacer()
+        }
+    }
+}
+
 struct TimelineView: View {
     let gameState: GameState
-
+    
     var body: some View {
         GlassMorphicCard {
             VStack(alignment: .leading, spacing: 16) {
@@ -409,7 +508,7 @@ struct CardEventRow: View {
                         .foregroundColor(.white)
                 }
                 
-                Text("\(event.time / 60)' - \(event.half == 1 ? "1 Half" : event.half == 2 ? "2 Half" : event.half == 3 ? "ET1" : "ET2")")
+                Text("\(event.time / 60)' - \(event.half == 1 ? "1st Half" : event.half == 2 ? "2nd Half" : event.half == 3 ? "ET1" : "ET2")")
                     .font(.caption)
                     .foregroundColor(.white.opacity(0.7))
             }
@@ -443,7 +542,7 @@ struct SubstitutionRow: View {
                         .font(.caption)
                         .foregroundColor(.yellow)
                     
-                    Text("- \(substitution.half == 1 ? "1 Half" : substitution.half == 2 ? "2 Half" : substitution.half == 3 ? "ET1" : "ET2")")
+                    Text("- \(substitution.half == 1 ? "1st Half" : substitution.half == 2 ? "2nd Half" : substitution.half == 3 ? "ET1" : "ET2")")
                         .font(.caption)
                         .foregroundColor(.white.opacity(0.7))
                 }

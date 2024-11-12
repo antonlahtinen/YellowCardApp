@@ -6,75 +6,102 @@ struct ScoreboardView: View {
     @ObservedObject var gameState: GameState
     /// Controls the animation state of the scoreboard elements
     @State private var isAnimating = false
-
+    
     /// Colors used for the background gradient
     private let gradientColors = [
         Color(red: 0.1, green: 0.2, blue: 0.45),
         Color(red: 0.1, green: 0.1, blue: 0.2)
     ]
-
+    
     /// Formats the current game time as MM:SS string
     var formattedTime: String {
         let minutes = gameState.currentHalfState.time / 60
         let seconds = gameState.currentHalfState.time % 60
         return String(format: "%02d:%02d", minutes, seconds)
     }
-
+    
     var body: some View {
         VStack(spacing: 16) {
             // Main scoreboard
             ScoreboardPanel {
-                HStack(spacing: 20) {
-                    // Home team score
-                    TeamScore(
-                        team: gameState.homeTeam,
-                        score: gameState.homeScore,
-                        alignment: .leading
-                    )
-                    .frame(maxWidth: .infinity)
-
-                    // VS separator
-                    Text("VS")
-                        .font(.system(size: 24, weight: .bold, design: .rounded))
-                        .foregroundColor(.white.opacity(0.7))
-
-                    // Away team score
-                    TeamScore(
-                        team: gameState.awayTeam,
-                        score: gameState.awayScore,
-                        alignment: .trailing
-                    )
-                    .frame(maxWidth: .infinity)
+                if gameState.half == 5 {
+                    // Penalty shootout scoreboard
+                    HStack(spacing: 20) {
+                        // Home team penalties
+                        TeamScore(
+                            team: gameState.homeTeam,
+                            score: gameState.penaltyShootoutHomeScore,
+                            alignment: .leading
+                        )
+                        .frame(maxWidth: .infinity)
+                        
+                        // Penalties indicator
+                        Text("PENS")
+                            .font(.system(size: 24, weight: .bold, design: .rounded))
+                            .foregroundColor(.white.opacity(0.7))
+                        
+                        // Away team penalties
+                        TeamScore(
+                            team: gameState.awayTeam,
+                            score: gameState.penaltyShootoutAwayScore,
+                            alignment: .trailing
+                        )
+                        .frame(maxWidth: .infinity)
+                    }
+                    .padding(.horizontal)
+                } else {
+                    // Regular match scoreboard
+                    HStack(spacing: 20) {
+                        TeamScore(
+                            team: gameState.homeTeam,
+                            score: gameState.homeScore,
+                            alignment: .leading
+                        )
+                        .frame(maxWidth: .infinity)
+                        
+                        Text("VS")
+                            .font(.system(size: 24, weight: .bold, design: .rounded))
+                            .foregroundColor(.white.opacity(0.7))
+                        
+                        TeamScore(
+                            team: gameState.awayTeam,
+                            score: gameState.awayScore,
+                            alignment: .trailing
+                        )
+                        .frame(maxWidth: .infinity)
+                    }
+                    .padding(.horizontal)
                 }
-                .padding(.horizontal)
             }
-            .offset(y: isAnimating ? 0 : -30)
+            .offset(y: isAnimating ? 0 : 30)
             .opacity(isAnimating ? 1 : 0)
-
+            
             // Time panel
             ScoreboardPanel(height: 50) {
                 HStack(spacing: 16) {
                     TimeIndicator(label: "HALF", value: gameState.halfName)
                         .frame(maxWidth: .infinity)
-
-                    Divider()
-                        .frame(height: 20)
-                        .background(Color.white.opacity(0.3))
-
-                    TimeIndicator(label: "TIME", value: formattedTime)
-                        .frame(maxWidth: .infinity)
-
-                    if gameState.currentHalfState.stoppageTime > 0 {
+                    
+                    if gameState.half != 5 {
                         Divider()
                             .frame(height: 20)
                             .background(Color.white.opacity(0.3))
-
-                        TimeIndicator(
-                            label: "STOPPAGE",
-                            value: "+\(gameState.currentHalfState.stoppageTime)'",
-                            valueColor: .yellow
-                        )
-                        .frame(maxWidth: .infinity)
+                        
+                        TimeIndicator(label: "TIME", value: formattedTime)
+                            .frame(maxWidth: .infinity)
+                        
+                        if gameState.currentHalfState.stoppageTime > 0 {
+                            Divider()
+                                .frame(height: 20)
+                                .background(Color.white.opacity(0.3))
+                            
+                            TimeIndicator(
+                                label: "STOPPAGE",
+                                value: "+\(gameState.currentHalfState.stoppageTime)'",
+                                valueColor: .yellow
+                            )
+                            .frame(maxWidth: .infinity)
+                        }
                     }
                 }
                 .padding(.horizontal)
@@ -90,7 +117,6 @@ struct ScoreboardView: View {
             }
         }
     }
-    
 }
 
 /// A container view that provides a consistent style for scoreboard panels
@@ -99,12 +125,12 @@ struct ScoreboardPanel<Content: View>: View {
     var height: CGFloat = 80
     /// The content to display within the panel
     let content: Content
-
+    
     init(height: CGFloat = 80, @ViewBuilder content: () -> Content) {
         self.height = height
         self.content = content()
     }
-
+    
     var body: some View {
         content
             .frame(maxWidth: .infinity)
@@ -129,13 +155,13 @@ struct TimeIndicator: View {
     let value: String
     /// The color of the value text (defaults to white)
     var valueColor: Color = .white
-
+    
     var body: some View {
         VStack(spacing: 4) {
             Text(label)
                 .font(.system(size: 12, weight: .medium))
                 .foregroundColor(.white.opacity(0.7))
-
+            
             Text(value)
                 .font(.system(size: 20, weight: .bold, design: .rounded))
                 .foregroundColor(valueColor)
