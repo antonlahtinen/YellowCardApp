@@ -50,8 +50,8 @@ struct GoalView: View {
                     .font(.system(size: 12))
                     .foregroundColor(.yellow)
                 
-                // Half
-                Text(half == 1 ? "- 1st Half" : "- 2nd Half")
+                // Half 1, 2 ET1 or ET2
+                Text(half == 1 ? "- 1st Half" : half == 2 ? "- 2nd Half" : half == 3 ? "- ET1" : "- ET2")
                     .font(.system(size: 12))
                     .foregroundColor(.white.opacity(0.7))
                     

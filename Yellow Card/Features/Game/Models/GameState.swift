@@ -57,6 +57,8 @@ class GameState: ObservableObject, Identifiable, Codable {
         self.awayTeam = awayTeam
         _halves = Published(initialValue: [
             HalfState(halfDuration: halfDuration),
+            HalfState(halfDuration: halfDuration),
+            HalfState(halfDuration: halfDuration),
             HalfState(halfDuration: halfDuration)
         ])
         
@@ -116,7 +118,7 @@ class GameState: ObservableObject, Identifiable, Codable {
     
     /// Sets up a binding to observe changes in the current half's state.
     /// When `currentHalfState` emits `objectWillChange`, this method forwards it to the `GameState`'s `objectWillChange`.
-    private func setupCurrentHalfBinding() {
+     func setupCurrentHalfBinding() {
         currentHalfState.objectWillChange
             .sink { [weak self] in
                 self?.objectWillChange.send()
@@ -129,6 +131,10 @@ class GameState: ObservableObject, Identifiable, Codable {
     /// Starts or stops the timer for the current half.
     func startStopTimer() {
         currentHalfState.startStopTimer()
+    }
+    
+    func stopTimer() {
+        currentHalfState.stopTimer()
     }
     
     /// Resets the timer for the current half.
@@ -148,12 +154,26 @@ class GameState: ObservableObject, Identifiable, Codable {
         }
     /// Switches the current half (e.g., from first to second half).
     func switchHalf() {
-            if half < 4 {
-                half += 1
-                cancellables.removeAll()
-                setupCurrentHalfBinding()
-            }
+        if half < 4 {
+            half += 1
+            cancellables.removeAll()
+            setupCurrentHalfBinding()
         }
+    }
+    
+    var halfName: String {
+        switch half {
+            case 1: return "1st"
+            case 2: return "2nd"
+            case 3: return "ET 1"
+            case 4: return "ET 2"
+            default: return "\(half)"
+        }
+    }
+    
+    var isExtraTime: Bool {
+        return half > 2
+    }
     
     /// Adds stoppage time to the current half.
     func addStoppageTime() {

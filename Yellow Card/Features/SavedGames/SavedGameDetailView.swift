@@ -84,7 +84,8 @@ struct GoalRow: View {
                         .font(.caption)
                         .foregroundColor(.green)
                     
-                    Text("- \(goal.half == 1 ? "1st Half" : "2nd Half")")
+                    // Half 1, 2 ET1 or ET2
+                    Text(goal.half == 1 ? "- 1st Half" : goal.half == 2 ? "- 2nd Half" : goal.half == 3 ? "- ET1" : "- ET2")
                         .font(.caption)
                         .foregroundColor(.white.opacity(0.7))
                     
@@ -161,7 +162,7 @@ struct ScoreCardView: View {
 
 struct TimelineView: View {
     let gameState: GameState
-    
+
     var body: some View {
         GlassMorphicCard {
             VStack(alignment: .leading, spacing: 16) {
@@ -170,24 +171,65 @@ struct TimelineView: View {
                     .fontWeight(.bold)
                     .foregroundColor(.white)
                 
-                HStack(spacing: 20) {
-                    TimelineHalf(
-                        half: "1st Half",
-                        time: formatTime(gameState.halves[0].time),
-                        stoppageTime: gameState.halves[0].stoppageTime
-                    )
-                    
-                    TimelineHalf(
-                        half: "2nd Half",
-                        time: formatTime(gameState.halves[1].time),
-                        stoppageTime: gameState.halves[1].stoppageTime
-                    )
+                // Check if extra time halves are present
+                let hasExtraTime = gameState.halves[2].time > 0
+                
+                if hasExtraTime {
+                    // More than two halves, use ScrollView
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: 20) {
+                            TimelineHalf(
+                                half: "1st Half",
+                                time: formatTime(gameState.halves[0].time),
+                                stoppageTime: gameState.halves[0].stoppageTime
+                            )
+                            
+                            TimelineHalf(
+                                half: "2nd Half",
+                                time: formatTime(gameState.halves[1].time),
+                                stoppageTime: gameState.halves[1].stoppageTime
+                            )
+                            
+                            TimelineHalf(
+                                half: "ET 1",
+                                time: formatTime(gameState.halves[2].time),
+                                stoppageTime: gameState.halves[2].stoppageTime
+                            )
+                            
+                            TimelineHalf(
+                                half: "ET 2",
+                                time: formatTime(gameState.halves[3].time),
+                                stoppageTime: gameState.halves[3].stoppageTime
+                            )
+                        }
+                    }
+                } else {
+                    // Only two halves, make them fill the available space
+                    HStack(spacing: 20) {
+                        TimelineHalf(
+                            half: "1st Half",
+                            time: formatTime(gameState.halves[0].time),
+                            stoppageTime: gameState.halves[0].stoppageTime
+                        )
+                        .frame(maxWidth: .infinity)
+                        .layoutPriority(1)
+                        
+                        TimelineHalf(
+                            half: "2nd Half",
+                            time: formatTime(gameState.halves[1].time),
+                            stoppageTime: gameState.halves[1].stoppageTime
+                        )
+                        .frame(maxWidth: .infinity)
+                        .layoutPriority(1)
+                    }
                 }
             }
             .padding()
         }
     }
 }
+
+
 
 struct CardsSection: View {
     let cardEvents: [CardEvent]
@@ -367,7 +409,7 @@ struct CardEventRow: View {
                         .foregroundColor(.white)
                 }
                 
-                Text("\(event.time / 60)' - \(event.half == 1 ? "1st Half" : "2nd Half")")
+                Text("\(event.time / 60)' - \(event.half == 1 ? "1 Half" : event.half == 2 ? "2 Half" : event.half == 3 ? "ET1" : "ET2")")
                     .font(.caption)
                     .foregroundColor(.white.opacity(0.7))
             }
@@ -401,7 +443,7 @@ struct SubstitutionRow: View {
                         .font(.caption)
                         .foregroundColor(.yellow)
                     
-                    Text("- \(substitution.half == 1 ? "1st Half" : "2nd Half")")
+                    Text("- \(substitution.half == 1 ? "1 Half" : substitution.half == 2 ? "2 Half" : substitution.half == 3 ? "ET1" : "ET2")")
                         .font(.caption)
                         .foregroundColor(.white.opacity(0.7))
                 }

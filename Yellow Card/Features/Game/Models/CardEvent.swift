@@ -17,7 +17,17 @@ struct CardEvent: Identifiable, Codable, Equatable {
         case home = "Home"
         case away = "Away"
     }
-
+    
+    var periodName: String {
+        switch half {
+        case 1: return "1st Half"
+        case 2: return "2nd Half"
+        case 3: return "ET1"
+        case 4: return "ET2"
+        default: return ""
+        }
+    }
+    
     var id = UUID()
     let playerNumber: String
     let cardType: CardType

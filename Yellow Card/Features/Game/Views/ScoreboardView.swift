@@ -54,7 +54,7 @@ struct ScoreboardView: View {
             // Time panel
             ScoreboardPanel(height: 50) {
                 HStack(spacing: 16) {
-                    TimeIndicator(label: "HALF", value: "\(gameState.half)")
+                    TimeIndicator(label: "HALF", value: gameState.halfName)
                         .frame(maxWidth: .infinity)
 
                     Divider()
@@ -90,6 +90,7 @@ struct ScoreboardView: View {
             }
         }
     }
+    
 }
 
 /// A container view that provides a consistent style for scoreboard panels

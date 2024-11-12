@@ -16,6 +16,9 @@ struct GameControlView: View {
     @State private var showingResetAlert = false
     /// State variable to control switch half alert visibility
     @State private var showingSwitchHalfAlert = false
+    
+    @State private var showingHalfPicker = false
+    @State private var selectedHalf = 1
 
     // MARK: - Body
 
@@ -111,27 +114,49 @@ struct GameControlView: View {
 
             // Half switch control
             ControlButton(
-                label: "Switch to Half \(gameState.half == 1 ? "2" : "1")",
+                label: "Switch Half",
                 size: .medium,
                 width: 250,
-                action: { showingSwitchHalfAlert = true }
+                action: { showingHalfPicker = true }
             )
             .offset(y: isAnimating ? 0 : 30)
             .opacity(isAnimating ? 1 : 0)
-            
-            // Alert for half switch confirmation
-            .alert("Switch Half", isPresented: $showingSwitchHalfAlert) {
+            .alert("Switch Half", isPresented: $showingHalfPicker) {
                 Button("Cancel", role: .cancel) {}
-
-                Button("Switch", role: .destructive) {
-                    // Stop the timer of the current half
-                    gameState.startStopTimer()
-                    
-                    // Switch to the next half
-                    gameState.switchHalf()
+                
+                Button("1st Half") {
+                    if gameState.currentHalfState.isRunning {
+                        gameState.stopTimer()
+                    }
+                    gameState.half = 1
+                    gameState.setupCurrentHalfBinding()
+                }
+                
+                Button("2nd Half") {
+                    if gameState.currentHalfState.isRunning {
+                        gameState.stopTimer()
+                    }
+                    gameState.half = 2
+                    gameState.setupCurrentHalfBinding()
+                }
+                
+                Button("ET 1") {
+                    if gameState.currentHalfState.isRunning {
+                        gameState.stopTimer()
+                    }
+                    gameState.half = 3
+                    gameState.setupCurrentHalfBinding()
+                }
+                
+                Button("ET 2") {
+                    if gameState.currentHalfState.isRunning {
+                        gameState.stopTimer()
+                    }
+                    gameState.half = 4
+                    gameState.setupCurrentHalfBinding()
                 }
             } message: {
-                Text("Are you sure you want to switch to the next half? The timer for the current half will be stopped.")
+                Text("Select which half you want to switch to. The timer for the current half will be stopped.")
             }
 
             // Card events section
@@ -297,7 +322,8 @@ struct CardEventsPanel: View {
     var body: some View {
         ControlPanel {
             ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 16) {
+                // Set HStack alignment to .top
+                HStack(alignment: .top, spacing: 16) {
                     ForEach(events) { event in
                         VStack(spacing: 8) {
                             // Card display
@@ -323,7 +349,7 @@ struct CardEventsPanel: View {
                                     .font(.system(size: 12))
                                     .foregroundColor(.yellow)
                                 
-                                Text(event.half == 1 ? "- 1st Half" : "- 2nd Half")
+                                Text(event.half == 1 ? "- 1st Half" : event.half == 2 ? "- 2nd Half" : event.half == 3 ? "- ET1" : "- ET2")
                                     .font(.system(size: 12))
                                     .foregroundColor(.white.opacity(0.7))
                             }
@@ -346,6 +372,7 @@ struct CardEventsPanel: View {
         }
     }
 }
+
 
 /// A view that displays a scrollable list of substitution events
 struct SubstitutionsPanel: View {
@@ -387,7 +414,7 @@ struct SubstitutionsPanel: View {
                                     .font(.system(size: 12))
                                     .foregroundColor(.yellow)
                                 
-                                Text(sub.half == 1 ? "- 1st Half" : "- 2nd Half")
+                                Text(sub.half == 1 ? "- 1st Half" : sub.half == 2 ? "- 2nd Half" : sub.half == 3 ? "- ET1" : "- ET2")
                                     .font(.system(size: 12))
                                     .foregroundColor(.white.opacity(0.7))
                             }
