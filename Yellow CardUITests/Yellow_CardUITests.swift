@@ -28,7 +28,7 @@ final class Yellow_CardUITests: XCTestCase {
         XCTAssertTrue(savedGamesButton.waitForExistence(timeout: 2))
         
         // Test version text
-        let versionText = app.staticTexts["Version 1.0.0"].firstMatch
+        let versionText = app.staticTexts["Version 1.2.0"].firstMatch
         XCTAssertTrue(versionText.waitForExistence(timeout: 2))
     }
     

@@ -120,7 +120,16 @@ struct MenuOptionsButtons: View {
                     icon: "folder.fill"
                 )
                 .accessibilityIdentifier("savedGamesButton")
-                
+            }
+            
+            // Info/About NavigationLink
+            NavigationLink(value: NavigationDestination.info) {
+                MenuButton(
+                    title: "About",
+                    subtitle: "App information and help",
+                    icon: "info.circle.fill"
+                )
+                .accessibilityIdentifier("infoButton")
             }
         }
         .padding(.horizontal, UIScreen.main.bounds.width * 0.05)
@@ -133,7 +142,7 @@ struct MenuOptionsButtons: View {
 struct FooterView: View {
     var body: some View {
         VStack(spacing: UIScreen.main.bounds.height * 0.01) {
-            Text("Version 1.0.0")
+            Text("Version 1.2.0")
                 .font(.caption)
                 .foregroundColor(.white.opacity(0.5))
         }

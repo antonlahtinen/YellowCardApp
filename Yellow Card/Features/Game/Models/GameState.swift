@@ -34,7 +34,7 @@ class GameState: ObservableObject, Identifiable, Codable {
     }
     
     // MARK: - Private Properties
-    /// A set to hold Combine cancellables for managing subscriptions.
+    /// A set to hold Combine cancellables for managing subscriptions. (game)
     private var cancellables = Set<AnyCancellable>()
     
     

@@ -7,6 +7,7 @@ enum NavigationDestination: Hashable {
     case newGameSettings
     case savedGames
     case gameView(GameState) // Associated value to pass game state data
+    case info
 }
 
 // MARK: - ContentView
@@ -33,6 +34,8 @@ struct ContentView: View {
                     case .gameView(let gameState):
                         // Passes game state and navigation path to GameView
                         GameView(gameState: gameState, path: $path)
+                    case .info:
+                        InfoView()
                     }
                 }
         }
